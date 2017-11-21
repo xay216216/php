@@ -1,0 +1,165 @@
+1  PHP的内存泄露问题与垃圾回收	http://blog.csdn.net/zhaoxuejie/article/details/48272875
+
+2  终端命令：php -m  查看php已安装扩展命令  php -i 查看php信息
+
+3  例如安装PHP Xdebug扩展
+	1）sudo apt-cache search xdebug
+	2）sudo apt-get install xdebug
+	3）php -m     会显示当前php加载的有效模块
+	4）php -i     则输出无html格式的phpinfo
+	5）php -ini   选项可以输出当前php加载ini配置文件的数量、路径信息
+	6）php -f /var/www/html/infophp.php   在终端执行此PHP文件
+	7) php -f /var/www/html/infophp.php | less   由于输出结果太大，我们可以通过管道将上述输出结果输送给 less 命令，这样就可以一次输出一屏了
+	8) php -r 'phpinfo();' 终端打印PHP信息
+	9）php -a  以交互模式运行PHP并做一些数学运算。这里，‘-a‘ 选项用于以交互模式运行PHP
+4	http://www.cnblogs.com/work115/p/5620272.html	
+	进程、线程和协程之间的关系和区别也困扰我一阵子了，最近有一些心得，写一下。
+	进程拥有自己独立的堆和栈，既不共享堆，亦不共享栈，进程由操作系统调度。
+	线程拥有自己独立的栈和共享的堆，共享堆，不共享栈，线程亦由操作系统调度(标准线程是的)。
+	协程和线程一样共享堆，不共享栈，协程由程序员在协程的代码里显示调度。
+	进程和其他两个的区别还是很明显的。
+	协程和线程的区别是：协程避免了无意义的调度，由此可以提高性能，但也因此，程序员必须自己承担调度的责任，同时，协程也失去了标准线程使用多CPU的能力。
+	打个比方吧，假设有一个操作系统，是单核的，系统上没有其他的程序需要运行，有两个线程 A 和 B ，A 和 B 在单独运行时都需要 10 秒来完成自己的任务，
+	而且任务都是运算操作，A B 之间也没有竞争和共享数据的问题。现在 A B 两个线程并行，操作系统会不停的在 A B 两个线程之间切换，达到一种伪并行的效果，
+	假设切换的频率是每秒一次，切换的成本是 0.1 秒(主要是栈切换)，总共需要 20 + 19 * 0.1 = 21.9 秒。如果使用协程的方式，可以先运行协程 A ，
+	A 结束的时候让位给协程 B ，只发生一次切换，总时间是 20 + 1 * 0.1 = 20.1 秒。如果系统是双核的，而且线程是标准线程，
+	那么 A B 两个线程就可以真并行，总时间只需要 10 秒，而协程的方案仍然需要 20.1 秒。
+5	EXPLAIN SELECT id ,create_time FROM  xm_content WHERE create_time > '2017-11-02 00:00:00';
+	mysql数据库工具 EXPLAIN 可以分析查询
+	字段datetime 和 timestamp的区别 datetime存进去就是死值改变服务器时间他不会变
+6	PHP底层
+	http://blog.csdn.net/ToBeTheBestman/article/details/73655622?locationNum=4&fps=1
+7	HTTP与HTTPS的区别
+	http://www.cnblogs.com/wqhwe/p/5407468.html
+	超文本传输协议HTTP协议被用于在Web浏览器和网站服务器之间传递信息，HTTP协议以明文方式发送内容，不提供任何方式的数据加密，如果攻击者截取了Web浏览器和网站服务器之间的传输报文，
+	就可以直接读懂其中的信息，因此，HTTP协议不适合传输一些敏感信息，比如：	信用卡号、密码等支付信息。
+　　	为了解决HTTP协议的这一缺陷，需要使用另一种协议：安全套接字层超文本传输协议HTTPS，为了数据传输的安全，HTTPS在HTTP的基础上加入了SSL协议，SSL依靠证书来验证服务器的身份，并为浏览器和服务器之间的通信加密。
+
+	一、HTTP和HTTPS的基本概念
+　　	HTTP：是互联网上应用最为广泛的一种网络协议，是一个客户端和服务器端请求和应答的标准（TCP），用于从WWW服务器传输超文本到本地浏览器的传输协议，它可以使浏览器更加高效，使网络传输减少。
+　　	HTTPS：是以安全为目标的HTTP通道，简单讲是HTTP的安全版，即HTTP下加入SSL层，HTTPS的安全基础是SSL，因此加密的详细内容就需要SSL。
+　　	HTTPS协议的主要作用可以分为两种：一种是建立一个信息安全通道，来保证数据传输的安全；另一种就是确认网站的真实性。
+
+	HTTPS和HTTP的区别主要如下：
+　　	1、https协议需要到ca申请证书，一般免费证书较少，因而需要一定费用。
+　　	2、http是超文本传输协议，信息是明文传输，https则是具有安全性的ssl加密传输协议。
+　　	3、http和https使用的是完全不同的连接方式，用的端口也不一样，前者是80，后者是443。
+　　	4、http的连接很简单，是无状态的；HTTPS协议是由SSL+HTTP协议构建的可进行加密传输、身份认证的网络协议，比http协议安全
+8	php 底层见资料php.html
+9	$result=1;
+	if(-1){
+	 $result=2;
+	}
+	echo $result;    //请看boolean值转换
+	<?php
+	function test(){
+	 $a=1;
+	 $b=&$a;
+	 echo (++$a)+(++$a);
+	}
+	test();  //新的php7.0做了处理 变量的存储
+	?>
+	<?php
+	function test(){
+	 $a=1;
+	 $b=&$a;
+	 echo (++$a)+(++$a)+(++$a);
+	}
+	test();
+	?>
+	php7.0 新增的操作符
+	$a ?: $b的意思是 $a为true时，直接返回$a, 否则返回$b
+	$a ?? $b的意思是 $a isset($a)为true, 且不为NULL, 就返回$a, 否则返回$b。
+	<=>用于比较两个表达式。当$a小于、等于或大于$b时它分别返回-1、0或1
+	到php7版本，define()的功能和const就一摸一样了，所以，你随便用哪一个都可以，但是因为在class类中，什么常量是const。
+	const QWE = [12,33,44,55]; 所以，我们就统一用const申明常量好了
+
+10	php 操作redis 
+	http://blog.csdn.net/kwinh/article/details/54907660#keys-pattern-查询相应的key
+	http://redisdoc.com/
+
+	在redis里,允许模糊查询key 
+	有3个通配符 *, ? ,[] 
+	*: 通配任意多个字符 
+	?: 通配单个字符 
+	[]: 通配括号内的某1个字符
+
+	var_dump($redis->keys('*o*')); //array(3) { [0]=> string(4) "four" [1]=> string(3) "two" [2]=> string(3) "one" }
+	var_dump($redis->keys('t??')); //array(1) { [0]=> string(3) "two" }
+	var_dump($redis->keys('t[w]*')); //array(1) { [0]=> string(3) "two" }
+	print_r($redis->keys('*')); //Array ( [0] => four [1] => three [2] => two [3] => one )
+	
+	在redis-cli里面操作　　https://www.cnblogs.com/woshimrf/p/5198361.html
+	#查看所有key
+	keys *  或  keys "*"
+	#查看匹配前缀的keys
+	keys "miao*"
+	#清空redis
+	flushdb
+	#随机取出一个key
+	randomkey
+	#查看key的类型
+	type key	
+	#查看数据库中key的数量
+	dbsize
+	#查看服务器信息
+	info	
+	#查看redis正在做什么
+	monitor   #注意，有高手的文章说这个会急剧降低redis性能，只能在测试环境使用。
+	#查看日志
+	slowlog get
+	slowlog get 10
+
+11      php session_id函数
+	ＰＨＰ５　　PHPSESSIONID = hash_func(客户端IP + 当前时间（秒）+ 当前时间（微妙）+ PHP自带的随机数生产器)　　hash_func = md5 / sha1 #可由php.ini配置
+	ＰＨＰ７　　PHPSESSIONID　＝　/dev/urandom　　用的系统生产的随机数作为PHPSESSIONID
+12	php register_shutdown_function函数作用
+	PHP提供register_shutdown_function()这个函数，能够在脚本终止前回调注册的函数,也就是当 PHP 程序执行完成后执行的函数。
+	egister_shutdown_function　执行机制是：ＰＨＰ把要调用的函数调入内存。当页面所有ＰＨＰ语句都执行完成时，再调用此 函数。注意，在这个时候从内存中调用，不是从ＰＨＰ页面中调用，
+	所以如果有路径信息，应使用绝对路径，因为ＰＨＰ已经当原来的页面不存在了。就没有什么相对路径可言。
+      注意：register_shutdown_function是指在执行完所有PHP语句后再调用函数，不要理解成客户端关闭流浏览器页面时调用函数。
+      可以这样理解调用条件：
+	第一种：php代码执行过程中发生错误
+	第二种：php代码顺利执行成功
+	第三种：php代码运行超时
+	第四种：页面被用户强制停止
+	fastcgi_finish_request　函数的作用
+13	php高级教程　　http://blog.csdn.net/s1070/article/details/51174710
+	5.PHP的垃圾收集机制是怎样的（腾讯）
+	PHP可以自动进行内存管理，清除不再需要的对象。
+	PHP使用了引用计数(reference counting)这种单纯的垃圾回收(garbage collection)机制。每个对象都内含一个引用计数器，每个reference连接到对象，
+	计数器加1。当reference离开生存空间或被设为NULL，计数器减1。当某个对象的引用计数器为零时，PHP知道你将不再需要使用这个对象，释放其所占的内存空间。
+14	@ini_set('memory_limit', '1024M');说明
+	PHP ini_set用来设置php.ini的值，在函数执行的时候生效，脚本结束后，设置失效。无需打开php.ini文件，就能修改配置，对于虚拟空间来说，很方便。
+	'menory_limit'：设定一个脚本所能够申请到的最大内存字节数，这有利于写的不好的脚本消耗服务器上的可用内存。@符号代表不输出错误。
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
